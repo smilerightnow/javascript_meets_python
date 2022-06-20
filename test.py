@@ -1,4 +1,4 @@
-from bnilang import *
+from jsmpy import *
 from utils import *
 import pprint, re
 code = """
@@ -15,12 +15,7 @@ function haha(){
 	print("inside")
 }
 
-if (eq(add(6,4), 10)){
-print("yes")
-}
 
-add(1,2)
-eq(add(6,4), 10)
 haha()
 
 """
