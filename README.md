@@ -1,5 +1,7 @@
 # javascript_meets_python
 
+This is an interpreter of a mixup language between python and javascript. It has the syntax of javascript and functions of python.
+I wrote this because I was searching for a sandboxed python or a secure way to run python with restrictions. It seems like python wasn't created with sandboxing in mind. So, I wrote this in the goal of securing python functions and writing an interpreter. "Free two birds with one key" ;)
 
 # TODO:
 
