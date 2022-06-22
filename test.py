@@ -10,13 +10,21 @@ print("one", "two", 45.99, 3, [1,2,3], ["dd", "bb"], {"nice": 123}, var, {"ddff"
 
 k = [1,2]
 print(k)
+
+new_var = add(2, 5)
+print(new_var)
+
+gg = math.pi
+print(gg)
+
 function haha(){
 	var = 6
 	print("inside")
 }
-
-
 haha()
+
+a = requests.get("https://api.ipify.org/?format=json")
+print(a)
 
 """
 
@@ -31,7 +39,7 @@ parse_code = Parser(code)
 	# print(m.groups())
 
 pp = pprint.PrettyPrinter(width=41, compact=True)
-pp.pprint(parse_code.parse())
+# pp.pprint(parse_code.parse())
 parse_code.eval()
 # pp.pprint(parse_code.ENV)
 

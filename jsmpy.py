@@ -4,12 +4,12 @@ from utils import *
 
 #### TODO:
 
-# replace calls with their return values
-# change ENV name for math module and str, int... to math.sqrt, math.sin ...
+# add methods to calls. example: requests.get("something") --> requests.get("something").text ...
+# replace calls with their return values. example: print(add(1,2)) --> print(3) --> 3
 # look for blocks inside blocks
-# 
+# eval blocks
 
-#### Limitations:
+#### Currently:
 
 # every new call/variable... must be in a new line
 # you can't use double quotes inside a double quote string, same thing as single quotes. (can be fixed with a better regex)
@@ -35,24 +35,21 @@ ENV.update({
 	'print':   	print,
 	'round':   	round,
 	'range':	range,
-	'request':	requests.request
+	"type":		type,
+	'requests.get':	requests.get
 })
 
 for dt in [float, int, str, list, dict]:
-	ENV.update({dt.__name__: clear_modules(dict(vars(dt)))})
-	
-ENV.update({"math": clear_modules(vars(math))}) # sin, cos, sqrt, pi, ...
+	for key, value in clear_modules(dict(vars(dt))).items():
+		ENV.update({dt.__name__ + "." + key: value})
+for key, value in clear_modules(vars(math)).items():
+	ENV.update({"math."+key: value})
 
-# print(ENV)
 ##str.__class__.__base__.__subclasses__()
 
 #####
 class Parser:
-		
-	"""Security:"""
-	"if it's not (str int/float bool array dict) then error"
-	"if the method doesn't contain __: example-> for method in dir(list): if not '__' in method:"
-	
+
 	def __init__(self, js):
 		self.js = js
 		self.ENV = ENV.copy()
@@ -103,6 +100,7 @@ class Parser:
 					left, right = line[2]
 					self.ENV[left.strip()] = self.parse_var(right)
 			if len(line) > 3: ##blocks
+				"""TODO"""
 				pass
 	
 	def error(self, err):
@@ -130,27 +128,50 @@ class Parser:
 	
 	def find_calls(self):
 		"for every block, find their calls."
-		calls_re = r"^([a-zA-Z0-9_ \t]*?)\(([^\n]*)\)"
+		calls_re = r"^([a-zA-Z0-9_ \.\t]*?)\(([^\n]*)\)"
 		
 		return self.filter_regex(calls_re, self.js)
 	
 	def parse_var(self, var):
+		temp_var = var
 		arr = re.findall(r"\[(.*?)\]|{(.*?)}", var)
 		string = re.findall(r"'([^']*)'|\"([^\"]*)\"", var)
 		
-		if arr:
-			try:
-				var = json.loads(var)
+		try:
+			var = int(var) ##if int
+		except:
+			try: ## it's a call
+				name, args = re.findall(r"^([a-zA-Z0-9_ \.\t]*?)\(([^\n]*)\)", var)[0]
+				if name.startswith("__"):
+					self.error(f"call {name} can't be started with __")
+				elif name.strip() in self.ENV:
+					__call__ = self.ENV[name.strip()]
+					var = __call__(*self.parse_args(args))
 			except Exception as e:
-				self.error(f"can't parse {var}")
-		elif string:
-			a, b = string[0]
-			var = a if a else b
-		else:
+				try:
+					if "object is not callable" in str(e):
+						name, args = re.findall(r"^([a-zA-Z0-9_ \.\t]*?)\(([^\n]*)\)", var)[0]
+						var = self.ENV[name.strip()]
+				except:
+					pass
+				# print(e)
+				pass
+		
+		if var == temp_var:
+			if arr:
+				try:
+					var = json.loads(var)
+				except Exception as e:
+					self.error(f"can't parse {var}")
+			elif string:
+				a, b = string[0]
+				var = a if a else b
+		
+		if var == temp_var: ## if nothing else worked. maybe it's a variable in ENV.
 			try:
-				var = int(var)
+				var = self.ENV[var.strip()]
 			except:
-				var = self.ENV[var]
+				pass
 		
 		return var
 	def parse_args(self, args):		
