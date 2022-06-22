@@ -7,7 +7,7 @@ I wrote this because I was searching for a sandboxed python or a secure way to r
 
 #### add methods to calls. example: requests.get("something") --> requests.get("something").text ...
 #### replace calls with their return values. example: print(add(1,2)) --> print(3) --> 3
-#### look for blocks inside blocks
+#### look for blocks inside blocks (blocks are every function or if/else...)
 #### eval blocks
 
 # Currently:
